@@ -1,0 +1,10 @@
+{
+  "mysql": {
+    "host": "localhost",
+    "port": 3306,
+    "user": "root",
+    "password": "mokshjain@710",
+    "database": "student_crud_db"
+  },
+  "use_sqlite_fallback_if_mysql_unavailable": true
+}
