@@ -4,7 +4,7 @@ import sqlite3
 import tempfile
 from flask import Flask, request, jsonify, send_from_directory
 
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__, static_folder="public", static_url_path="")
 
 # Load configuration
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
@@ -190,7 +190,11 @@ def ensure_db_init():
 # =======================================================
 @app.route("/")
 def index():
-    return send_from_directory("static", "index.html")
+    return send_from_directory("public", "index.html")
+
+@app.route("/static/<path:path>")
+def static_fallback(path):
+    return send_from_directory("public", path)
 
 
 # =======================================================
