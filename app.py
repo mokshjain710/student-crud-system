@@ -4,10 +4,13 @@ import sqlite3
 import tempfile
 from flask import Flask, request, jsonify, send_from_directory
 
-app = Flask(__name__, static_folder="public", static_url_path="")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PUBLIC_DIR = os.path.join(BASE_DIR, "public")
+
+app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
 
 # Load configuration
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 config = {
     "mysql": {
         "host": "localhost",
@@ -190,11 +193,11 @@ def ensure_db_init():
 # =======================================================
 @app.route("/")
 def index():
-    return send_from_directory("public", "index.html")
+    return send_from_directory(PUBLIC_DIR, "index.html")
 
 @app.route("/static/<path:path>")
 def static_fallback(path):
-    return send_from_directory("public", path)
+    return send_from_directory(PUBLIC_DIR, path)
 
 
 # =======================================================

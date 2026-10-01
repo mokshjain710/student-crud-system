@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System | DBMS CRUD Project</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="brand-icon">🎓</div>
+                <div>
+                    <h1>Student Management System</h1>
+                    <p class="subtitle">DBMS Mini-Project &bull; Full CRUD Operations (MySQL)</p>
+                </div>
+            </div>
+            <div class="badge-container">
+                <span id="db-engine-badge" class="badge badge-mysql">Connecting to DB...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- Stat Cards Section -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon bg-blue">👥</div>
+                <div class="stat-info">
+                    <p class="stat-label">Total Students</p>
+                    <h2 id="total-students-val">0</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-green">⭐</div>
+                <div class="stat-info">
+                    <p class="stat-label">Average CGPA</p>
+                    <h2 id="avg-cgpa-val">0.00</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-purple">🏛️</div>
+                <div class="stat-info">
+                    <p class="stat-label">Departments</p>
+                    <h2 id="total-depts-val">0</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content: Create Form & Records Table -->
+        <div class="layout-grid">
+            
+            <!-- CREATE SECTION: Form -->
+            <section class="card form-card">
+                <div class="card-header">
+                    <h2>➕ Add New Student Record</h2>
+                    <p>Insert a new row into the MySQL <code>students</code> table.</p>
+                </div>
+                <form id="create-student-form">
+                    <div class="form-group">
+                        <label for="roll_no">Roll Number *</label>
+                        <input type="text" id="roll_no" placeholder="e.g. CS103" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" placeholder="e.g. Rahul Sharma" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" placeholder="e.g. rahul@example.com" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="department">Department *</label>
+                            <select id="department" required>
+                                <option value="">Select Department</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="AIDS">AIDS (AI & Data Science)</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Civil">Civil</option>
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label for="semester">Semester (1-8) *</label>
+                            <select id="semester" required>
+                                <option value="1">Sem 1</option>
+                                <option value="2">Sem 2</option>
+                                <option value="3">Sem 3</option>
+                                <option value="4">Sem 4</option>
+                                <option value="5">Sem 5</option>
+                                <option value="6" selected>Sem 6</option>
+                                <option value="7">Sem 7</option>
+                                <option value="8">Sem 8</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cgpa">CGPA (0.00 - 10.00) *</label>
+                        <input type="number" id="cgpa" step="0.01" min="0" max="10" placeholder="e.g. 8.75" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btn-submit-create">
+                        <span>Save to Database</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- READ, UPDATE, DELETE SECTION: Table -->
+            <section class="card table-card">
+                <div class="card-header flex-between">
+                    <div>
+                        <h2>📋 Student Directory</h2>
+                        <p>Real-time records from MySQL database.</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" id="btn-refresh" title="Reload data">
+                        🔄 Refresh
+                    </button>
+                </div>
+
+                <!-- Controls: Search & Filter -->
+                <div class="table-controls">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" placeholder="Search by name, roll no, email...">
+                    </div>
+                    <div class="filter-box">
+                        <select id="dept-filter">
+                            <option value="">All Departments</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="AIDS">AIDS (AI & Data Science)</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name & Email</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>CGPA</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-table-body">
+                            <tr>
+                                <td colspan="6" class="text-center loading-text">Loading student records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
+        </div>
+
+    </main>
+
+    <!-- UPDATE MODAL -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Edit Student Record</h3>
+                <button class="btn-close" id="btn-close-edit">&times;</button>
+            </div>
+            <form id="edit-student-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <label for="edit-roll_no">Roll Number *</label>
+                    <input type="text" id="edit-roll_no" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-name">Full Name *</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-email">Email Address *</label>
+                    <input type="email" id="edit-email" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="edit-department">Department *</label>
+                        <select id="edit-department" required>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="AIDS">AIDS (AI & Data Science)</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Civil">Civil</option>
+                        </select>
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="edit-semester">Semester *</label>
+                        <select id="edit-semester" required>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-cgpa">CGPA (0.00 - 10.00) *</label>
+                    <input type="number" id="edit-cgpa" step="0.01" min="0" max="10" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-edit">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>🗑️ Confirm Deletion</h3>
+                <button class="btn-close" id="btn-close-delete">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete student <strong id="delete-student-name"></strong> (<span id="delete-student-roll"></span>)?</p>
+                <p class="danger-text">This will permanently execute a <code>DELETE FROM students WHERE id = ?</code> query.</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="btn-cancel-delete">Cancel</button>
+                <button type="button" class="btn btn-danger" id="btn-confirm-delete">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
