@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, send_from_directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 
-app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
+app = Flask(__name__, static_folder=None)
 
 # Load configuration
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
@@ -187,18 +187,6 @@ def ensure_db_init():
     if not _db_initialized:
         init_database()
         _db_initialized = True
-
-# =======================================================
-# FRONTEND ROUTE
-# =======================================================
-@app.route("/")
-def index():
-    return send_from_directory(PUBLIC_DIR, "index.html")
-
-@app.route("/static/<path:path>")
-def static_fallback(path):
-    return send_from_directory(PUBLIC_DIR, path)
-
 
 # =======================================================
 # REST API ENDPOINTS (CRUD OPERATIONS)
@@ -472,6 +460,28 @@ def get_stats():
         })
     finally:
         conn.close()
+
+
+# =======================================================
+# FRONTEND & STATIC ROUTING (UNIVERSAL FOR VERCEL & LOCAL)
+# =======================================================
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def catch_all(path):
+    # 1. If path points to an actual file in public (like style.css, app.js), serve it
+    file_path = os.path.join(PUBLIC_DIR, path)
+    if path and os.path.exists(file_path) and os.path.isfile(file_path):
+        return send_from_directory(PUBLIC_DIR, path)
+
+    # 2. Support /static/ prefix
+    if path.startswith("static/"):
+        sub_path = path[7:]
+        static_file = os.path.join(PUBLIC_DIR, sub_path)
+        if os.path.exists(static_file) and os.path.isfile(static_file):
+            return send_from_directory(PUBLIC_DIR, sub_path)
+
+    # 3. For any other path (including / and /api/index.py from Vercel), serve index.html
+    return send_from_directory(PUBLIC_DIR, "index.html")
 
 
 if __name__ == "__main__":
